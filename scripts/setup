@@ -1,0 +1,30 @@
+#!/bin/bash
+
+set -e
+
+if [[ "${CI}" ]]; then
+    set -x
+fi
+
+function usage() {
+    echo -n \
+        "Usage: $(basename "$0")
+Sets up this project for development.
+"
+}
+
+if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
+    # Build docker containers
+    scripts/update
+
+    # Migrate the DB
+    echo "migrating..."
+    scripts/migrate
+
+    # Start the containers
+    echo "Starting the containers"
+    scripts/start --d
+
+    echo "Done."
+
+fi

@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  coin-api:
+    image: coin-api
+    container_name: coin-api
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
+    volumes:
+      - ./server:/opt/src
+    command: >
+      bash -c "while ! nc -z coin-db 5432; do sleep 0.1; done; uvicorn api.main:app --reload --workers 1 --host 0.0.0.0 --port 8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@coin-db:5432/api_dev
+    depends_on:
+      - coin-db
+
+  coin-db:
+    image: coin-db
+    container_name: coin-db
+    build:
+      context: ./server/db
+      dockerfile: Dockerfile
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    name: coin-network
