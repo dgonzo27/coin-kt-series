@@ -5,7 +5,6 @@ from typing import List
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
-from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
 from api.models.pydantic.items import ItemPayloadSchema
@@ -13,20 +12,12 @@ from api.models.sqlalchemy import Item
 
 
 def list(db: Session) -> List[Item]:
-    """list all items"""
+    """Returns a list of items."""
     return db.query(Item).all()
 
 
-def get(id: int, db: Session) -> Item:
-    """get a single item"""
-    item = db.query(Item).filter(Item.id == id).first()
-    if not item:
-        raise HTTPException(status_code=404, detail="Item not found.")
-    return item
-
-
 def post(payload: ItemPayloadSchema, db: Session) -> Item:
-    """create a single item"""
+    """Creates and returns a single item."""
     item = Item(**payload.model_dump(exclude_unset=True))
     db.add(item)
     db.commit()
@@ -34,8 +25,16 @@ def post(payload: ItemPayloadSchema, db: Session) -> Item:
     return item
 
 
+def get(id: int, db: Session) -> Item:
+    """Gets and returns a single item by ID."""
+    item = db.query(Item).filter(Item.id == id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found.")
+    return item
+
+
 def put(id: int, payload: ItemPayloadSchema, db: Session) -> Item:
-    """update a single item"""
+    """Updates and returns a single item by ID."""
     item = db.query(Item).filter(Item.id == id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Item not found.")
@@ -45,6 +44,7 @@ def put(id: int, payload: ItemPayloadSchema, db: Session) -> Item:
     for field in obj_data:
         if field in put_data:
             setattr(item, field, put_data[field])
+
     db.add(item)
     db.commit()
     db.refresh(item)
@@ -52,7 +52,7 @@ def put(id: int, payload: ItemPayloadSchema, db: Session) -> Item:
 
 
 def delete(id: int, db: Session) -> JSONResponse:
-    """delete a single item"""
+    """Deletes a single item by ID, returning a JSON response."""
     item = db.query(Item).filter(Item.id == id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Item not found.")
