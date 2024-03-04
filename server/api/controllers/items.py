@@ -1,19 +1,19 @@
 """Items controllers"""
 
-from typing import List
-
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
+from fastapi_pagination import Page
+from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy.orm import Session
 
 from api.models.pydantic.items import ItemPayloadSchema
 from api.models.sqlalchemy import Item
 
 
-def list(db: Session) -> List[Item]:
+def list(db: Session) -> Page[Item]:
     """Returns a list of items."""
-    return db.query(Item).all()
+    return paginate(db.query(Item))
 
 
 def post(payload: ItemPayloadSchema, db: Session) -> Item:

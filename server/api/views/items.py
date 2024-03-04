@@ -1,8 +1,7 @@
 """Items views"""
 
-from typing import List
-
 from fastapi import APIRouter, Depends, Path, Response
+from fastapi_pagination import Page
 from sqlalchemy.orm import Session
 
 from api.controllers import items
@@ -13,7 +12,7 @@ from api.models.pydantic import items as models
 router = APIRouter()
 
 
-@router.get("", response_model=List[models.ItemResponseSchema], status_code=200)
+@router.get("", response_model=Page[models.ItemResponseSchema], status_code=200)
 def list_items(db: Session = Depends(get_db)) -> Response:
     return items.list(db)
 

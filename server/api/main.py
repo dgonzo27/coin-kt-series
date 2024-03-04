@@ -3,6 +3,7 @@
 import logging
 
 from fastapi import FastAPI
+from fastapi_pagination import add_pagination as init_pagination
 
 from api.config import get_settings
 from api.middleware import init_middleware
@@ -22,6 +23,7 @@ def init_app() -> FastAPI:
     )
 
     init_middleware(_app)
+    init_pagination(_app)
     init_routes(_app)
 
     return _app
